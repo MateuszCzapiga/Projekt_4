@@ -20,8 +20,28 @@
 // Values for other objects (eg. buttons)
 #define ID_BUTTON1				200
 #define ID_BUTTON2				201
-#define ID_RBUTTON1				210
-#define ID_RBUTTON2				211
+#define ID_1_2				210
+#define ID_1_3				211
+#define ID_1_4				212
+#define ID_1_5				213
+#define ID_2_1				214
+#define ID_2_3				215
+#define ID_2_4				216
+#define ID_2_5				217
+#define ID_3_1				218
+#define ID_3_2				219
+#define ID_3_4				220
+#define ID_3_5				221
+#define ID_4_1				222
+#define ID_4_2				223
+#define ID_4_3				224
+#define ID_4_5				225
+#define ID_5_1				226
+#define ID_5_2				227
+#define ID_5_3				228
+#define ID_5_4				229
+
+
 
 // Next default values for new objects
 //
