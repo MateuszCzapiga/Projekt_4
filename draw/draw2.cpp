@@ -668,7 +668,6 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 			rysuj_osobe(hdc, 1, 2, dane, hWnd, ps, &kolejka1);
 			break;
 		case ID_1_3:
-
 			zbieranie_danych(dane, 1, 3);
 			rysuj_osobe(hdc, 1, 3, dane, hWnd, ps, &kolejka1);
 			break;
