@@ -205,54 +205,54 @@ void rysuj_osobe(HDC& hdc, int poczatek, int cel, informacje dane, HWND hWnd, PA
 	for (int i = 0; i < dane.osoby_na_pietrach[poczatek - 1].size(); i++)
 	{
 
-	switch (dane.osoby_na_pietrach[poczatek-1][i])
-	{
-	case 1:
-		r = 128, g = 255, b = 255;
-		break;
-	case 2:
-		r = 0, g = 255, b = 64;
-		break;
-	case 3:
-		r = 255, g = 0, b = 128;
-		break;
-	case 4:
-		r = 0, g = 0, b = 255;
-		break;
-	case 5:
-		r = 255, g = 255, b = 0;
-		break;
-	default:
-		break;
-	}
-	Pen pietro(Color(255, r, g, b));
-	int przesuniecie = dane.osoby_na_pietrach[poczatek - 1][dane.osoby_na_pietrach[poczatek - 1].size()-1];
-	switch (poczatek)
-	{//RECT kolejka1 = { 610, 718, 690, 698 };
-	/*	RECT kolejka1 = { 610, 718, 690, 698 };
-		RECT kolejka2 = { 1010, 590, 1090, 570 };
-		RECT kolejka3 = { 610, 462, 690, 442 };
-		RECT kolejka4 = { 1010, 334, 1090, 314 };
-		RECT kolejka5 = { 610, 206, 690, 186 };*/
-		
-	case 1:
-		graphics.DrawLine(&pietro, 685 - i*10, 717, 685 - i * 10, 670); // 1.pietro
-		break;
-	case 2:
-		graphics.DrawLine(&pietro, 915 + i * 10, 589, 915 + i * 10, 542); // 2.pietro
-		break;
-	case 3:
-		graphics.DrawLine(&pietro, 685 - i * 10, 461, 685 - i * 10, 414); // 3.pietro
-		break;
-	case 4:
-		graphics.DrawLine(&pietro, 915 + i * 10, 333, 915 + i * 10, 286); // 4.pietro
-		break;
-	case 5:
-		graphics.DrawLine(&pietro, 685 - i * 10, 205, 685 - i * 10, 158); // 5.pietro
-		break;
-	default:
-		break;
-	}
+		switch (dane.osoby_na_pietrach[poczatek - 1][i])
+		{
+		case 1:
+			r = 128, g = 255, b = 255;
+			break;
+		case 2:
+			r = 0, g = 255, b = 64;
+			break;
+		case 3:
+			r = 255, g = 0, b = 128;
+			break;
+		case 4:
+			r = 0, g = 0, b = 255;
+			break;
+		case 5:
+			r = 255, g = 255, b = 0;
+			break;
+		default:
+			break;
+		}
+		Pen pietro(Color(255, r, g, b));
+		int przesuniecie = dane.osoby_na_pietrach[poczatek - 1][dane.osoby_na_pietrach[poczatek - 1].size() - 1];
+		switch (poczatek)
+		{//RECT kolejka1 = { 610, 718, 690, 698 };
+		/*	RECT kolejka1 = { 610, 718, 690, 698 };
+			RECT kolejka2 = { 1010, 590, 1090, 570 };
+			RECT kolejka3 = { 610, 462, 690, 442 };
+			RECT kolejka4 = { 1010, 334, 1090, 314 };
+			RECT kolejka5 = { 610, 206, 690, 186 };*/
+
+		case 1:
+			graphics.DrawLine(&pietro, 685 - i * 10, 717, 685 - i * 10, 670); // 1.pietro
+			break;
+		case 2:
+			graphics.DrawLine(&pietro, 915 + i * 10, 589, 915 + i * 10, 542); // 2.pietro
+			break;
+		case 3:
+			graphics.DrawLine(&pietro, 685 - i * 10, 461, 685 - i * 10, 414); // 3.pietro
+			break;
+		case 4:
+			graphics.DrawLine(&pietro, 915 + i * 10, 333, 915 + i * 10, 286); // 4.pietro
+			break;
+		case 5:
+			graphics.DrawLine(&pietro, 685 - i * 10, 205, 685 - i * 10, 158); // 5.pietro
+			break;
+		default:
+			break;
+		}
 	}
 	EndPaint(hWnd, &ps);
 }
@@ -282,27 +282,49 @@ int szukanie_min_pietra(informacje dane)
 int szukanie_max_pietra(informacje dane, int obecne_pietro)
 {
 	int max = -1;
-	for (int i = 0; i < dane.osoby_na_pietrach[obecne_pietro].size(); i++)
+	for (int i = 0; i < dane.osoby_na_pietrach[obecne_pietro-1].size(); i++)
 	{
-		if (dane.osoby_na_pietrach[obecne_pietro][i] > max)
-			max = dane.osoby_na_pietrach[obecne_pietro][i];
+		if (dane.osoby_na_pietrach[obecne_pietro - 1][i] > max && dane.osoby_na_pietrach[obecne_pietro - 1][i] != 0)
+			max = dane.osoby_na_pietrach[obecne_pietro-1][i];
 	}
 	return max;
 }
 
-void Jezdzenie (informacje &dane)
+bool koniec(informacje dane)
+{
+	bool zwracana = true;
+	for (int i = 0; i < dane.osoby_na_pietrach.size(); i++)
+	{
+		for (int j = 0; j < dane.osoby_na_pietrach[i].size(); j++)
+			if (dane.osoby_na_pietrach[i][j] != 0)
+				zwracana = false;
+			else
+				zwracana = true;
+	}
+	return zwracana;
+}
+
+void Jezdzenie(informacje& dane)
 {
 	int obecne_pietro = 0;
-	while (!dane.osoby_na_pietrach.empty() && dane.osoby_w_windzie.empty())
+	if (koniec(dane) && dane.osoby_w_windzie.empty())
+		int a;
+	else 
+		int b;
+	while (!koniec(dane) || !dane.osoby_w_windzie.size() == 0)
 	{
 		int min_pietro = szukanie_min_pietra(dane);
 		obecne_pietro = min_pietro;
 		//przejazd();wizualny
 		int max_pietro = szukanie_max_pietra(dane, obecne_pietro);
-		for (int i = 0; i < dane.osoby_na_pietrach[obecne_pietro].size(); i++)
+		for (int i = 0; i < dane.osoby_na_pietrach[obecne_pietro-1].size(); i++)
 		{
-			if (dane.osoby_na_pietrach[obecne_pietro][i] > obecne_pietro && dane.osoby_w_windzie.size()<7)
-				dane.osoby_w_windzie.push_back(dane.osoby_na_pietrach[obecne_pietro][i]);
+			if (dane.osoby_na_pietrach[obecne_pietro - 1][i] > obecne_pietro - 1 && dane.osoby_w_windzie.size() < 7)
+			{
+				dane.osoby_w_windzie.push_back(dane.osoby_na_pietrach[obecne_pietro - 1][i]);
+				dane.osoby_na_pietrach[obecne_pietro - 1][i] = 0;
+				//dane.osoby_na_pietrach[obecne_pietro - 1].erase(dane.osoby_na_pietrach[obecne_pietro - 1].begin()+i, dane.osoby_na_pietrach[obecne_pietro - 1].begin()+i + 1);
+			}
 		}
 		if (!dane.osoby_w_windzie.empty())
 		{
@@ -314,15 +336,31 @@ void Jezdzenie (informacje &dane)
 				for (int k = 0; k < dane.osoby_w_windzie.size(); k++)
 				{
 					if (dane.osoby_w_windzie[k] == obecne_pietro) //wysiadka
-						dane.osoby_w_windzie.erase(dane.osoby_w_windzie.begin()+k, dane.osoby_w_windzie.begin() + k+1);
+					{
+						dane.osoby_w_windzie[k] = 0;
+						//dane.osoby_w_windzie.erase(dane.osoby_w_windzie.begin() + k, dane.osoby_w_windzie.begin() + k + 1);
+					}
 				}
-				for (int i = 0; i < dane.osoby_na_pietrach[obecne_pietro].size(); i++)
+				for (int i = 0; i < dane.osoby_na_pietrach[obecne_pietro-1].size(); i++)
 				{//wsiadanko
-					if (dane.osoby_na_pietrach[obecne_pietro][i] > obecne_pietro && dane.osoby_w_windzie.size() < 7)
-						dane.osoby_w_windzie.push_back(dane.osoby_na_pietrach[obecne_pietro][i]);
+					if (dane.osoby_na_pietrach[obecne_pietro - 1][i] > obecne_pietro - 1 && dane.osoby_w_windzie.size() < 7)
+					{
+						dane.osoby_w_windzie.push_back(dane.osoby_na_pietrach[obecne_pietro - 1][i]);
+						dane.osoby_na_pietrach[obecne_pietro - 1].erase(dane.osoby_na_pietrach[obecne_pietro - 1].begin() + i, dane.osoby_na_pietrach[obecne_pietro - 1].begin() + i + 1);
+					}
 				}
-
 			}
+
+
+			// usuwanie 0 -- osoby na pietrach
+			for (int i = 0; i < dane.osoby_na_pietrach.size(); i++)
+				for (int j = 0; j < dane.osoby_na_pietrach[i].size(); j++)
+					if (dane.osoby_na_pietrach[i][j] == 0)
+						dane.osoby_na_pietrach[i].erase(dane.osoby_na_pietrach[i].begin() + j, dane.osoby_na_pietrach[i].begin() + j + 1);
+			// usuwanie 0 -- osoby w windzie
+			for (int i = 0; i < dane.osoby_w_windzie.size(); i++)
+				if (dane.osoby_w_windzie[i] == 0)
+					dane.osoby_w_windzie.erase(dane.osoby_w_windzie.begin() + i, dane.osoby_w_windzie.begin() + i + 1);
 		}
 	}
 }
