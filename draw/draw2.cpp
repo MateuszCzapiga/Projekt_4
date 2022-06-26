@@ -21,11 +21,17 @@ INT value;
 
 // buttons
 HWND hwndButton;
+void Przerysuj_Winde1(HWND hWnd, HDC& hdc, PAINTSTRUCT& ps, RECT* drawArea);
 
 std::vector<Point> data;
 RECT drawArea1 = { 0, 0, 150, 200 };
 RECT drawArea2 = { 50, 400, 650, 422 };
 RECT winda = { 710, 70, 890, 720 };
+RECT kolejka1 = { 610, 718, 690, 698 };
+RECT kolejka2 = { 1010, 590, 1090, 570 };
+RECT kolejka3 = { 610, 462, 690, 442 };
+RECT kolejka4 = { 1010, 334, 1090, 314 };
+RECT kolejka5 = { 610, 206, 690, 186 };
 
 // Forward declarations of functions included in this code module:
 ATOM				MyRegisterClass(HINSTANCE hInstance);
@@ -86,37 +92,37 @@ void jezdzenie(HWND hWnd, HDC& hdc, PAINTSTRUCT& ps, RECT* drawArea, informacje 
 	}
 }
 
-void zbieranie_danych(informacje &dane, int pietro_poczatkowe, int pietro_koncowe)
+void zbieranie_danych(informacje& dane, int pietro_poczatkowe, int pietro_koncowe)
 {
 	if (dane.osoby_na_pietrach.size() == 0)
 		dane.osoby_na_pietrach.resize(5);
 	Sleep(200);
 	//for (int i = pietro_poczatkowe; i <= pietro_koncowe; i++)
 	bool czy_wpisac = true;
-	
+
 	for (int i = 0; i < dane.pietra_do_odwiedzenia.size(); i++)
 		if (dane.pietra_do_odwiedzenia[i] == pietro_poczatkowe)
 			czy_wpisac = false;
 	if (czy_wpisac)
 		dane.pietra_do_odwiedzenia.push_back(pietro_poczatkowe);
-	
+
 	czy_wpisac = true;
 
 	for (int i = 0; i < dane.pietra_do_odwiedzenia.size(); i++)
 		if (dane.pietra_do_odwiedzenia[i] == pietro_koncowe)
 			czy_wpisac = false;
-	if(czy_wpisac)
+	if (czy_wpisac)
 		dane.pietra_do_odwiedzenia.push_back(pietro_koncowe);
 
 	dane.osoby_na_pietrach[pietro_poczatkowe - 1].push_back(pietro_koncowe);
 
 	//dane.pietra_do_odwiedzenia.push_back(pietro_poczatkowe);
 	//dane.pietra_do_odwiedzenia.push_back(pietro_koncowe);
-	
-	sort(dane.pietra_do_odwiedzenia.begin(), dane.pietra_do_odwiedzenia.end());
+
+//	sort(dane.pietra_do_odwiedzenia.begin(), dane.pietra_do_odwiedzenia.end());
 }
 
-void przejazd(HWND hWnd, HDC& hdc, PAINTSTRUCT& ps, RECT* drawArea, informacje &dane, int pietro_poczatkowe, int pietro_koncowe)
+void przejazd(HWND hWnd, HDC& hdc, PAINTSTRUCT& ps, RECT* drawArea, informacje& dane, int pietro_poczatkowe, int pietro_koncowe)
 {
 	if (!dane.pietra_do_odwiedzenia.empty())
 	{
@@ -149,6 +155,11 @@ void Rysuj_Winde(HDC hdc)
 {
 	Graphics graphics(hdc);
 	Pen obramowanie(Color(255, 0, 0, 0));
+	Pen pietro1(Color(255, 128, 255, 255));
+	Pen pietro2(Color(255, 0, 255, 64));
+	Pen pietro3(Color(255, 255, 0, 128));
+	Pen pietro4(Color(255, 0, 0, 255));
+	Pen pietro5(Color(255, 255, 255, 0));
 	Pen zakres_windy(Color(255, 255, 0, 0));
 	Pen winda(Color(255, 0, 0, 255));
 
@@ -158,11 +169,16 @@ void Rysuj_Winde(HDC hdc)
 	graphics.DrawLine(&obramowanie, 700, 50, 900, 50); // gora
 	graphics.DrawLine(&obramowanie, 700, 750, 900, 750); // dol
 	// pietra
-	graphics.DrawLine(&obramowanie, 700, 208, 600, 208); // 5.pietro
-	graphics.DrawLine(&obramowanie, 900, 336, 1000, 336); // 4.pietro
-	graphics.DrawLine(&obramowanie, 700, 464, 600, 464); // 3.pietro
-	graphics.DrawLine(&obramowanie, 900, 592, 1000, 592); // 2.pietro
-	graphics.DrawLine(&obramowanie, 700, 720, 600, 720); // 1.pietro
+	graphics.DrawLine(&pietro5, 700, 208, 600, 208); // 5.pietro
+	graphics.DrawLine(&pietro5, 700, 207, 600, 207); // 5.pietro
+	graphics.DrawLine(&pietro4, 900, 336, 1000, 336); // 4.pietro
+	graphics.DrawLine(&pietro4, 900, 335, 1000, 335); // 4.pietro
+	graphics.DrawLine(&pietro3, 700, 464, 600, 464); // 3.pietro
+	graphics.DrawLine(&pietro3, 700, 463, 600, 463); // 3.pietro
+	graphics.DrawLine(&pietro2, 900, 592, 1000, 592); // 2.pietro
+	graphics.DrawLine(&pietro2, 900, 591, 1000, 591); // 2.pietro
+	graphics.DrawLine(&pietro1, 700, 720, 600, 720); // 1.pietro
+	graphics.DrawLine(&pietro1, 700, 719, 600, 719); // 1.pietro
 	//zakres windy
 	graphics.DrawLine(&zakres_windy, 710, 80, 890, 80); // gora
 	graphics.DrawLine(&zakres_windy, 710, 720, 890, 720); // dol
@@ -173,6 +189,71 @@ void Rysuj_Winde(HDC hdc)
 	graphics.DrawLine(&zakres_windy, 710, 620 + (obecne_pietro - 1) * (-128), 890, 620 + (obecne_pietro - 1) * (-128)); // gora
 	//graphics.DrawLine(&winda, 710, 720 + obecne_pietro, 710, 620 + obecne_pietro); // lewa
 	//graphics.DrawLine(&winda, 890, 720 + obecne_pietro, 890, 620 + obecne_pietro); // prawa
+}
+
+void rysuj_osobe(HDC& hdc, int poczatek, int cel, informacje dane, HWND hWnd, PAINTSTRUCT& ps, RECT* drawArea)
+{
+	if (drawArea == NULL)
+		InvalidateRect(hWnd, NULL, TRUE); // repaint all
+	else
+		InvalidateRect(hWnd, drawArea, TRUE); //repaint drawArea
+	EndPaint(hWnd, &ps);
+	hdc = BeginPaint(hWnd, &ps);
+	int r, g, b;
+	Graphics graphics(hdc);
+	for (int i = 0; i < dane.osoby_na_pietrach[poczatek - 1].size(); i++)
+	{
+
+	switch (dane.osoby_na_pietrach[poczatek-1][i])
+	{
+	case 1:
+		r = 128, g = 128, b = 255;
+		break;
+	case 2:
+		r = 0, g = 255, b = 64;
+		break;
+	case 3:
+		r = 255, g = 0, b = 128;
+		break;
+	case 4:
+		r = 0, g = 0, b = 255;
+		break;
+	case 5:
+		r = 255, g = 255, b = 0;
+		break;
+	default:
+		break;
+	}
+	Pen pietro(Color(255, r, g, b));
+	int przesuniecie = dane.osoby_na_pietrach[poczatek - 1][dane.osoby_na_pietrach[poczatek - 1].size()-1];
+	switch (poczatek)
+	{//RECT kolejka1 = { 610, 718, 690, 698 };
+	/*	RECT kolejka1 = { 610, 718, 690, 698 };
+		RECT kolejka2 = { 1010, 590, 1090, 570 };
+		RECT kolejka3 = { 610, 462, 690, 442 };
+		RECT kolejka4 = { 1010, 334, 1090, 314 };
+		RECT kolejka5 = { 610, 206, 690, 186 };*/
+		
+	case 1:
+		graphics.DrawLine(&pietro, 685 - i*5, 717, 685 - i * 5, 700); // 1.pietro
+		break;
+	case 2:
+		graphics.DrawLine(&pietro, 900 + i * 5, 589, 900 + i * 5, 572); // 2.pietro
+		break;
+	case 3:
+		graphics.DrawLine(&pietro, 700 - i * 5, 461, 700 - i * 5, 444); // 3.pietro
+		break;
+	case 4:
+		graphics.DrawLine(&pietro, 900 + i * 5, 333, 900 + i * 5, 316); // 4.pietro
+		break;
+	case 5:
+		graphics.DrawLine(&pietro, 700 - i * 5, 205, 700 - i * 5, 188); // 5.pietro
+		break;
+	default:
+		break;
+	}
+	}
+	EndPaint(hWnd, &ps);
 }
 
 void Przerysuj_Winde(HWND hWnd, HDC& hdc, PAINTSTRUCT& ps, RECT* drawArea)
@@ -188,6 +269,18 @@ void Przerysuj_Winde(HWND hWnd, HDC& hdc, PAINTSTRUCT& ps, RECT* drawArea)
 	EndPaint(hWnd, &ps);
 }
 
+void Przerysuj_Winde1(HWND hWnd, HDC& hdc, PAINTSTRUCT& ps, RECT* drawArea)
+{
+	if (drawArea == NULL)
+		InvalidateRect(hWnd, NULL, TRUE); // repaint all
+	else
+		InvalidateRect(hWnd, drawArea, TRUE); //repaint drawArea
+	EndPaint(hWnd, &ps);
+	hdc = BeginPaint(hWnd, &ps);
+
+	Rysuj_Winde(hdc);
+	EndPaint(hWnd, &ps);
+}
 void Pisz_1(HDC hdc, int przesuniecie)
 {
 	TextOut(hdc, 10 + przesuniecie, 10, TEXT("1"), strlen("1"));
@@ -271,7 +364,7 @@ ATOM MyRegisterClass(HINSTANCE hInstance)
 	wcex.hInstance = hInstance;
 	wcex.hIcon = LoadIcon(hInstance, MAKEINTRESOURCE(IDI_DRAW));
 	wcex.hCursor = LoadCursor(NULL, IDC_ARROW);
-	wcex.hbrBackground = (HBRUSH)(COLOR_WINDOW + 1);
+	wcex.hbrBackground = (HBRUSH)GetStockObject(BLACK_BRUSH);
 	wcex.lpszMenuName = MAKEINTRESOURCE(IDC_DRAW);
 	wcex.lpszClassName = szWindowClass;
 	wcex.hIconSm = LoadIcon(wcex.hInstance, MAKEINTRESOURCE(IDI_SMALL));
@@ -550,6 +643,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 	int wmId, wmEvent;
 	PAINTSTRUCT ps;
 	HDC hdc;
+	//hdc = BeginPaint(hWnd, &ps);
 	int pietro_poczatkowe = 1, pietro_koncowe = 1;
 
 	switch (message)
@@ -569,26 +663,90 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 			DestroyWindow(hWnd);
 			break;
 		case ID_1_2:
-			pietro_poczatkowe = 1;
-			pietro_koncowe = 2;
-			zbieranie_danych(dane, pietro_poczatkowe, pietro_koncowe); 
+			//hdc = BeginPaint(hWnd, &ps);
+			zbieranie_danych(dane, 1, 2);
+			rysuj_osobe(hdc, 1, 2, dane, hWnd, ps, &kolejka1);
 			break;
-
 		case ID_1_3:
-			pietro_poczatkowe = 1;
-			pietro_koncowe = 3;
-			/*obecne_pietro = pietro_2;
-			Przerysuj_Winde(hWnd, hdc, ps, &winda);
-			Sleep(2000);
-			obecne_pietro = pietro_3;
-			Przerysuj_Winde(hWnd, hdc, ps, &winda);*/
 
-			jezdzenie(hWnd, hdc, ps, &winda, dane, pietro_poczatkowe, pietro_koncowe);
+			zbieranie_danych(dane, 1, 3);
+			rysuj_osobe(hdc, 1, 3, dane, hWnd, ps, &kolejka1);
+			break;
+		case ID_1_4:
+			zbieranie_danych(dane, 1, 4);
+			rysuj_osobe(hdc, 1, 4, dane, hWnd, ps, &kolejka1);
+			break;
+		case ID_1_5:
+			zbieranie_danych(dane, 1, 5);
+			rysuj_osobe(hdc, 1, 5, dane, hWnd, ps, &kolejka1);
+			break;
+		case ID_2_1:
+			zbieranie_danych(dane, 2, 1);
+			rysuj_osobe(hdc, 2, 1, dane, hWnd, ps, &kolejka2);
 			break;
 		case ID_2_3:
-			pietro_poczatkowe = 2;
-			pietro_koncowe = 3;
-			jezdzenie(hWnd, hdc, ps, &winda, dane, pietro_poczatkowe, pietro_koncowe);
+			zbieranie_danych(dane, 2, 3);
+			rysuj_osobe(hdc, 2, 3, dane, hWnd, ps, &kolejka2);
+			break;
+		case ID_2_4:
+			zbieranie_danych(dane, 2, 4);
+			rysuj_osobe(hdc, 2, 4, dane, hWnd, ps, &kolejka2);
+			break;
+		case ID_2_5:
+			zbieranie_danych(dane, 2, 5);
+			rysuj_osobe(hdc, 2, 5, dane, hWnd, ps, &kolejka2);
+			break;
+		case ID_3_1:
+			zbieranie_danych(dane, 3, 1);
+			rysuj_osobe(hdc, 3, 1, dane, hWnd, ps, &kolejka3);
+			break;
+		case ID_3_2:
+			zbieranie_danych(dane, 3, 1);
+			rysuj_osobe(hdc, 3, 1, dane, hWnd, ps, &kolejka3);
+			break;
+		case ID_3_4:
+			zbieranie_danych(dane, 3, 4);
+			rysuj_osobe(hdc, 3, 4, dane, hWnd, ps, &kolejka3);
+			break;
+		case ID_3_5:
+			zbieranie_danych(dane, 3, 5);
+			rysuj_osobe(hdc, 3, 5, dane, hWnd, ps, &kolejka3);
+			break;
+		case ID_4_1:
+			zbieranie_danych(dane, 4, 1);
+			rysuj_osobe(hdc, 4, 1, dane, hWnd, ps, &kolejka4);
+			break;
+		case ID_4_2:
+			zbieranie_danych(dane, 4, 2);
+			rysuj_osobe(hdc, 4, 2, dane, hWnd, ps, &kolejka4);
+			break;
+		case ID_4_3:
+			zbieranie_danych(dane, 4, 3);
+			rysuj_osobe(hdc, 4, 3, dane, hWnd, ps, &kolejka4);
+			break;
+		case ID_4_5:
+			zbieranie_danych(dane, 4, 5);
+			rysuj_osobe(hdc, 4, 5, dane, hWnd, ps, &kolejka4);
+			break;
+		case ID_5_1:
+			zbieranie_danych(dane, 5, 1);
+			rysuj_osobe(hdc, 5, 1, dane, hWnd, ps, &kolejka5);
+			break;
+		case ID_5_2:
+			zbieranie_danych(dane, 5, 2);
+			rysuj_osobe(hdc, 5, 2, dane, hWnd, ps, &kolejka5);
+			break;
+		case ID_5_3:
+			zbieranie_danych(dane, 5, 3);
+			rysuj_osobe(hdc, 5, 3, dane, hWnd, ps, &kolejka5);
+			break;
+		case ID_5_4:
+			zbieranie_danych(dane, 5, 4);
+			rysuj_osobe(hdc, 5, 4, dane, hWnd, ps, &kolejka5);
+			break;
+		case ID_GO:
+			//zbieranie_danych(dane, 5, 2);
+
 			break;
 
 
@@ -633,8 +791,8 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 	default:
 		return DefWindowProc(hWnd, message, wParam, lParam);
 	}
-	while (!dane.pietra_do_odwiedzenia.empty())
-	przejazd(hWnd, hdc, ps, &winda, dane, pietro_poczatkowe, pietro_koncowe);
+	//while (!dane.pietra_do_odwiedzenia.empty())
+	//	przejazd(hWnd, hdc, ps, &winda, dane, pietro_poczatkowe, pietro_koncowe);
 	return 0;
 }
 

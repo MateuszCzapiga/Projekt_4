@@ -40,6 +40,7 @@
 #define ID_5_2				227
 #define ID_5_3				228
 #define ID_5_4				229
+#define ID_GO				230
 
 
 
