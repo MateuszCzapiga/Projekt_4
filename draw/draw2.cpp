@@ -21,17 +21,18 @@ INT value;
 
 // buttons
 HWND hwndButton;
-void Przerysuj_Winde1(HWND hWnd, HDC& hdc, PAINTSTRUCT& ps, RECT* drawArea);
+void Jezdzenie();
+
 
 std::vector<Point> data;
 RECT drawArea1 = { 0, 0, 150, 200 };
 RECT drawArea2 = { 50, 400, 650, 422 };
 RECT winda = { 710, 70, 890, 720 };
-RECT kolejka1 = { 610, 718, 690, 698 };
-RECT kolejka2 = { 1010, 590, 1090, 570 };
-RECT kolejka3 = { 610, 462, 690, 442 };
-RECT kolejka4 = { 1010, 334, 1090, 314 };
-RECT kolejka5 = { 610, 206, 690, 186 };
+RECT kolejka1 = { 610, 718, 690, 668 };
+RECT kolejka2 = { 910, 590, 990, 540 };
+RECT kolejka3 = { 610, 462, 690, 412 };
+RECT kolejka4 = { 910, 334, 990, 284 };
+RECT kolejka5 = { 610, 206, 690, 156 };
 
 // Forward declarations of functions included in this code module:
 ATOM				MyRegisterClass(HINSTANCE hInstance);
@@ -207,7 +208,7 @@ void rysuj_osobe(HDC& hdc, int poczatek, int cel, informacje dane, HWND hWnd, PA
 	switch (dane.osoby_na_pietrach[poczatek-1][i])
 	{
 	case 1:
-		r = 128, g = 128, b = 255;
+		r = 128, g = 255, b = 255;
 		break;
 	case 2:
 		r = 0, g = 255, b = 64;
@@ -235,19 +236,19 @@ void rysuj_osobe(HDC& hdc, int poczatek, int cel, informacje dane, HWND hWnd, PA
 		RECT kolejka5 = { 610, 206, 690, 186 };*/
 		
 	case 1:
-		graphics.DrawLine(&pietro, 685 - i*5, 717, 685 - i * 5, 700); // 1.pietro
+		graphics.DrawLine(&pietro, 685 - i*10, 717, 685 - i * 10, 670); // 1.pietro
 		break;
 	case 2:
-		graphics.DrawLine(&pietro, 900 + i * 5, 589, 900 + i * 5, 572); // 2.pietro
+		graphics.DrawLine(&pietro, 915 + i * 10, 589, 915 + i * 10, 542); // 2.pietro
 		break;
 	case 3:
-		graphics.DrawLine(&pietro, 700 - i * 5, 461, 700 - i * 5, 444); // 3.pietro
+		graphics.DrawLine(&pietro, 685 - i * 10, 461, 685 - i * 10, 414); // 3.pietro
 		break;
 	case 4:
-		graphics.DrawLine(&pietro, 900 + i * 5, 333, 900 + i * 5, 316); // 4.pietro
+		graphics.DrawLine(&pietro, 915 + i * 10, 333, 915 + i * 10, 286); // 4.pietro
 		break;
 	case 5:
-		graphics.DrawLine(&pietro, 700 - i * 5, 205, 700 - i * 5, 188); // 5.pietro
+		graphics.DrawLine(&pietro, 685 - i * 10, 205, 685 - i * 10, 158); // 5.pietro
 		break;
 	default:
 		break;
@@ -269,18 +270,11 @@ void Przerysuj_Winde(HWND hWnd, HDC& hdc, PAINTSTRUCT& ps, RECT* drawArea)
 	EndPaint(hWnd, &ps);
 }
 
-void Przerysuj_Winde1(HWND hWnd, HDC& hdc, PAINTSTRUCT& ps, RECT* drawArea)
+void Jezdzenie()
 {
-	if (drawArea == NULL)
-		InvalidateRect(hWnd, NULL, TRUE); // repaint all
-	else
-		InvalidateRect(hWnd, drawArea, TRUE); //repaint drawArea
-	EndPaint(hWnd, &ps);
-	hdc = BeginPaint(hWnd, &ps);
-
-	Rysuj_Winde(hdc);
-	EndPaint(hWnd, &ps);
+	while ()
 }
+
 void Pisz_1(HDC hdc, int przesuniecie)
 {
 	TextOut(hdc, 10 + przesuniecie, 10, TEXT("1"), strlen("1"));
@@ -616,6 +610,16 @@ BOOL InitInstance(HINSTANCE hInstance, int nCmdShow)
 		hInstance,                            // the instance of your application
 		NULL);                               // extra bits you dont really need 
 
+	hwndButton = CreateWindow(TEXT("button"),                      // The class name required is button
+		TEXT("START"),                  // the caption of the button
+		WS_CHILD | WS_VISIBLE | BS_PUSHBUTTON,  // the styles
+		770, 50,                                  // the left and top co-ordinates
+		60, 30,                              // width and height
+		hWnd,                                 // parent window handle
+		(HMENU)ID_GO,                   // the ID of your button
+		hInstance,                            // the instance of your application
+		NULL);                               // extra bits you dont really need 
+
 
 	if (!hWnd)
 	{
@@ -700,8 +704,8 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 			rysuj_osobe(hdc, 3, 1, dane, hWnd, ps, &kolejka3);
 			break;
 		case ID_3_2:
-			zbieranie_danych(dane, 3, 1);
-			rysuj_osobe(hdc, 3, 1, dane, hWnd, ps, &kolejka3);
+			zbieranie_danych(dane, 3, 2);
+			rysuj_osobe(hdc, 3, 2, dane, hWnd, ps, &kolejka3);
 			break;
 		case ID_3_4:
 			zbieranie_danych(dane, 3, 4);
