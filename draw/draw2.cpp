@@ -6,6 +6,8 @@
 #include <vector>
 #include <cstdio>
 #include <iostream>
+#include <chrono>
+#include <algorithm>
 
 #define MAX_LOADSTRING 100
 #define TMR_1 1
@@ -20,18 +22,9 @@ INT value;
 // buttons
 HWND hwndButton;
 
-int col = 0;
-int polozenie_windy = 0;
-int podloga = 0;
-int pietro_2 = -128;
-int pietro_3 = -256;
-int pietro_4 = -384;
-int pietro_5 = -512; 
-
-
 std::vector<Point> data;
 RECT drawArea1 = { 0, 0, 150, 200 };
-RECT drawArea2 = { 50, 400, 650, 422};
+RECT drawArea2 = { 50, 400, 650, 422 };
 RECT winda = { 710, 70, 890, 720 };
 
 // Forward declarations of functions included in this code module:
@@ -40,6 +33,104 @@ BOOL				InitInstance(HINSTANCE, int);
 LRESULT CALLBACK	WndProc(HWND, UINT, WPARAM, LPARAM);
 INT_PTR CALLBACK	About(HWND, UINT, WPARAM, LPARAM);
 INT_PTR CALLBACK	Buttons(HWND, UINT, WPARAM, LPARAM);
+void Przerysuj_Winde(HWND hWnd, HDC& hdc, PAINTSTRUCT& ps, RECT* drawArea);
+
+int col = 0;
+int obecne_pietro = 1;
+int podloga = 0;
+int pietro_1 = 1;
+int pietro_2 = 2;
+int pietro_3 = 3;
+int pietro_4 = 4;
+int pietro_5 = 5;
+struct informacje
+{
+	std::vector<int>osoby_w_windzie;
+
+	std::vector<int>pietra_do_odwiedzenia;
+
+	std::vector<std::vector<int>>osoby_na_pietrach;
+};
+
+informacje dane;
+
+
+
+void jezdzenie(HWND hWnd, HDC& hdc, PAINTSTRUCT& ps, RECT* drawArea, informacje dane, int pietro_poczatkowe, int pietro_koncowe)
+{
+	bool czy_jechac_dalej = true;
+	int ile_osob_na_pietrach = 0;
+
+	for (int i = 1; i <= dane.osoby_na_pietrach.size(); i++)
+		for (int j = 0; j < dane.osoby_na_pietrach[i - 1].size(); j++)
+			ile_osob_na_pietrach += 1;
+
+	Sleep(1000);
+	dane.pietra_do_odwiedzenia.push_back(pietro_poczatkowe); // przy przycisku ustalane
+	dane.pietra_do_odwiedzenia.push_back(pietro_koncowe);
+	sort(dane.pietra_do_odwiedzenia.begin(), dane.pietra_do_odwiedzenia.end());
+
+	//if (ile_osob_na_pietrach !=)
+
+	while (!dane.pietra_do_odwiedzenia.empty() && czy_jechac_dalej)
+	{
+
+		Sleep(1000);
+		obecne_pietro = dane.pietra_do_odwiedzenia.front();
+
+		// usuniecie z listy do odwiedzenia
+		dane.pietra_do_odwiedzenia.erase(dane.pietra_do_odwiedzenia.begin());
+
+		// rysuje winde na oczekiwanym pietrze
+		Przerysuj_Winde(hWnd, hdc, ps, drawArea);
+	}
+}
+
+void zbieranie_danych(informacje &dane, int pietro_poczatkowe, int pietro_koncowe)
+{
+	if (dane.osoby_na_pietrach.size() == 0)
+		dane.osoby_na_pietrach.resize(5);
+	Sleep(200);
+	//for (int i = pietro_poczatkowe; i <= pietro_koncowe; i++)
+	bool czy_wpisac = true;
+	
+	for (int i = 0; i < dane.pietra_do_odwiedzenia.size(); i++)
+		if (dane.pietra_do_odwiedzenia[i] == pietro_poczatkowe)
+			czy_wpisac = false;
+	if (czy_wpisac)
+		dane.pietra_do_odwiedzenia.push_back(pietro_poczatkowe);
+	
+	czy_wpisac = true;
+
+	for (int i = 0; i < dane.pietra_do_odwiedzenia.size(); i++)
+		if (dane.pietra_do_odwiedzenia[i] == pietro_koncowe)
+			czy_wpisac = false;
+	if(czy_wpisac)
+		dane.pietra_do_odwiedzenia.push_back(pietro_koncowe);
+
+	dane.osoby_na_pietrach[pietro_poczatkowe - 1].push_back(pietro_koncowe);
+
+	//dane.pietra_do_odwiedzenia.push_back(pietro_poczatkowe);
+	//dane.pietra_do_odwiedzenia.push_back(pietro_koncowe);
+	
+	sort(dane.pietra_do_odwiedzenia.begin(), dane.pietra_do_odwiedzenia.end());
+}
+
+void przejazd(HWND hWnd, HDC& hdc, PAINTSTRUCT& ps, RECT* drawArea, informacje &dane, int pietro_poczatkowe, int pietro_koncowe)
+{
+	if (!dane.pietra_do_odwiedzenia.empty())
+	{
+		Sleep(1000);
+		obecne_pietro = dane.pietra_do_odwiedzenia.front();
+
+		// usuniecie z listy do odwiedzenia
+		dane.pietra_do_odwiedzenia.erase(dane.pietra_do_odwiedzenia.begin());
+
+		// rysuje winde na oczekiwanym pietrze
+		Przerysuj_Winde(hWnd, hdc, ps, drawArea);
+	}
+}
+
 
 
 //void MyOnPaint(HDC hdc)
@@ -78,16 +169,14 @@ void Rysuj_Winde(HDC hdc)
 	graphics.DrawLine(&zakres_windy, 710, 80, 710, 720); // lewa
 	graphics.DrawLine(&zakres_windy, 890, 80, 890, 720); // prawa
 	// winda 180X100
-	//polozenie_windy = pietro_4;
-	graphics.DrawLine(&winda, 710, 720 + polozenie_windy, 890, 720 + polozenie_windy); // dol
-	graphics.DrawLine(&winda, 710, 620 + polozenie_windy, 890, 620 + polozenie_windy); // gora
-	graphics.DrawLine(&winda, 710, 720 + polozenie_windy, 710, 620 + polozenie_windy); // lewa
-	graphics.DrawLine(&winda, 890, 720 + polozenie_windy, 890, 620 + polozenie_windy); // prawa
+	graphics.DrawLine(&zakres_windy, 710, 720 + (obecne_pietro - 1) * (-128), 890, 720 + (obecne_pietro - 1) * (-128)); // dol
+	graphics.DrawLine(&zakres_windy, 710, 620 + (obecne_pietro - 1) * (-128), 890, 620 + (obecne_pietro - 1) * (-128)); // gora
+	//graphics.DrawLine(&winda, 710, 720 + obecne_pietro, 710, 620 + obecne_pietro); // lewa
+	//graphics.DrawLine(&winda, 890, 720 + obecne_pietro, 890, 620 + obecne_pietro); // prawa
 }
 
-void Przerysuj_Winde(HWND hWnd, HDC& hdc, PAINTSTRUCT& ps, RECT* drawArea, int przesuniecie)
+void Przerysuj_Winde(HWND hWnd, HDC& hdc, PAINTSTRUCT& ps, RECT* drawArea)
 {
-	
 	if (drawArea == NULL)
 		InvalidateRect(hWnd, NULL, TRUE); // repaint all
 	else
@@ -212,7 +301,7 @@ BOOL InitInstance(HINSTANCE hInstance, int nCmdShow)
 		CW_USEDEFAULT, 0, CW_USEDEFAULT, 0, NULL, NULL, hInstance, NULL);
 
 	// create button and store the handle                                                       
-	
+
 	//hwndButton = CreateWindow(TEXT("button"),                      // The class name required is button
 	//	TEXT("Draw"),                  // the caption of the button
 	//	WS_CHILD | WS_VISIBLE | BS_PUSHBUTTON,  // the styles
@@ -433,7 +522,7 @@ BOOL InitInstance(HINSTANCE hInstance, int nCmdShow)
 		(HMENU)ID_5_4,                   // the ID of your button
 		hInstance,                            // the instance of your application
 		NULL);                               // extra bits you dont really need 
-	
+
 
 	if (!hWnd)
 	{
@@ -461,6 +550,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 	int wmId, wmEvent;
 	PAINTSTRUCT ps;
 	HDC hdc;
+	int pietro_poczatkowe = 1, pietro_koncowe = 1;
 
 	switch (message)
 	{
@@ -478,12 +568,30 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 		case IDM_EXIT:
 			DestroyWindow(hWnd);
 			break;
-		case ID_1_2 :
-			polozenie_windy = podloga + pietro_2;
-			Przerysuj_Winde(hWnd, hdc, ps, &winda, polozenie_windy);
+		case ID_1_2:
+			pietro_poczatkowe = 1;
+			pietro_koncowe = 2;
+			zbieranie_danych(dane, pietro_poczatkowe, pietro_koncowe); 
+			break;
+
 		case ID_1_3:
-			polozenie_windy = podloga + pietro_3;
-			Przerysuj_Winde(hWnd, hdc, ps, &winda, polozenie_windy);
+			pietro_poczatkowe = 1;
+			pietro_koncowe = 3;
+			/*obecne_pietro = pietro_2;
+			Przerysuj_Winde(hWnd, hdc, ps, &winda);
+			Sleep(2000);
+			obecne_pietro = pietro_3;
+			Przerysuj_Winde(hWnd, hdc, ps, &winda);*/
+
+			jezdzenie(hWnd, hdc, ps, &winda, dane, pietro_poczatkowe, pietro_koncowe);
+			break;
+		case ID_2_3:
+			pietro_poczatkowe = 2;
+			pietro_koncowe = 3;
+			jezdzenie(hWnd, hdc, ps, &winda, dane, pietro_poczatkowe, pietro_koncowe);
+			break;
+
+
 		default:
 			return DefWindowProc(hWnd, message, wParam, lParam);
 		}
@@ -525,6 +633,8 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 	default:
 		return DefWindowProc(hWnd, message, wParam, lParam);
 	}
+	while (!dane.pietra_do_odwiedzenia.empty())
+	przejazd(hWnd, hdc, ps, &winda, dane, pietro_poczatkowe, pietro_koncowe);
 	return 0;
 }
 
