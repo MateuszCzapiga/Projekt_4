@@ -63,35 +63,35 @@ informacje dane;
 
 
 
-void jezdzenie(HWND hWnd, HDC& hdc, PAINTSTRUCT& ps, RECT* drawArea, informacje dane, int pietro_poczatkowe, int pietro_koncowe)
-{
-	bool czy_jechac_dalej = true;
-	int ile_osob_na_pietrach = 0;
-
-	for (int i = 1; i <= dane.osoby_na_pietrach.size(); i++)
-		for (int j = 0; j < dane.osoby_na_pietrach[i - 1].size(); j++)
-			ile_osob_na_pietrach += 1;
-
-	Sleep(1000);
-	dane.pietra_do_odwiedzenia.push_back(pietro_poczatkowe); // przy przycisku ustalane
-	dane.pietra_do_odwiedzenia.push_back(pietro_koncowe);
-	sort(dane.pietra_do_odwiedzenia.begin(), dane.pietra_do_odwiedzenia.end());
-
-	//if (ile_osob_na_pietrach !=)
-
-	while (!dane.pietra_do_odwiedzenia.empty() && czy_jechac_dalej)
-	{
-
-		Sleep(1000);
-		obecne_pietro = dane.pietra_do_odwiedzenia.front();
-
-		// usuniecie z listy do odwiedzenia
-		dane.pietra_do_odwiedzenia.erase(dane.pietra_do_odwiedzenia.begin());
-
-		// rysuje winde na oczekiwanym pietrze
-		Przerysuj_Winde(hWnd, hdc, ps, drawArea);
-	}
-}
+//void jezdzenie(HWND hWnd, HDC& hdc, PAINTSTRUCT& ps, RECT* drawArea, informacje dane, int pietro_poczatkowe, int pietro_koncowe)
+//{
+//	bool czy_jechac_dalej = true;
+//	int ile_osob_na_pietrach = 0;
+//
+//	for (int i = 1; i <= dane.osoby_na_pietrach.size(); i++)
+//		for (int j = 0; j < dane.osoby_na_pietrach[i - 1].size(); j++)
+//			ile_osob_na_pietrach += 1;
+//
+//	Sleep(1000);
+//	dane.pietra_do_odwiedzenia.push_back(pietro_poczatkowe); // przy przycisku ustalane
+//	dane.pietra_do_odwiedzenia.push_back(pietro_koncowe);
+//	sort(dane.pietra_do_odwiedzenia.begin(), dane.pietra_do_odwiedzenia.end());
+//
+//	//if (ile_osob_na_pietrach !=)
+//
+//	while (!dane.pietra_do_odwiedzenia.empty() && czy_jechac_dalej)
+//	{
+//
+//		Sleep(1000);
+//		obecne_pietro = dane.pietra_do_odwiedzenia.front();
+//
+//		// usuniecie z listy do odwiedzenia
+//		dane.pietra_do_odwiedzenia.erase(dane.pietra_do_odwiedzenia.begin());
+//
+//		// rysuje winde na oczekiwanym pietrze
+//		Przerysuj_Winde(hWnd, hdc, ps, drawArea);
+//	}
+//}
 
 void zbieranie_danych(informacje& dane, int pietro_poczatkowe, int pietro_koncowe)
 {
@@ -269,10 +269,62 @@ void Przerysuj_Winde(HWND hWnd, HDC& hdc, PAINTSTRUCT& ps, RECT* drawArea)
 	Rysuj_Winde(hdc);
 	EndPaint(hWnd, &ps);
 }
-
-void Jezdzenie()
+int szukanie_min_pietra(informacje dane)
 {
-	while ()
+	for (int i = 0; i < dane.osoby_na_pietrach.size(); i++)
+	{
+		if (!dane.osoby_na_pietrach[i].empty())
+			return i + 1;
+	}
+	return 1;
+}
+
+int szukanie_max_pietra(informacje dane, int obecne_pietro)
+{
+	int max = -1;
+	for (int i = 0; i < dane.osoby_na_pietrach[obecne_pietro].size(); i++)
+	{
+		if (dane.osoby_na_pietrach[obecne_pietro][i] > max)
+			max = dane.osoby_na_pietrach[obecne_pietro][i];
+	}
+	return max;
+}
+
+void Jezdzenie (informacje &dane)
+{
+	int obecne_pietro = 0;
+	while (!dane.osoby_na_pietrach.empty() && dane.osoby_w_windzie.empty())
+	{
+		int min_pietro = szukanie_min_pietra(dane);
+		obecne_pietro = min_pietro;
+		//przejazd();wizualny
+		int max_pietro = szukanie_max_pietra(dane, obecne_pietro);
+		for (int i = 0; i < dane.osoby_na_pietrach[obecne_pietro].size(); i++)
+		{
+			if (dane.osoby_na_pietrach[obecne_pietro][i] > obecne_pietro && dane.osoby_w_windzie.size()<7)
+				dane.osoby_w_windzie.push_back(dane.osoby_na_pietrach[obecne_pietro][i]);
+		}
+		if (!dane.osoby_w_windzie.empty())
+		{
+			for (int j = obecne_pietro; j < max_pietro; j++)
+			{
+				//przejazd na j+1
+				obecne_pietro = j + 1;
+				max_pietro = szukanie_max_pietra(dane, obecne_pietro);
+				for (int k = 0; k < dane.osoby_w_windzie.size(); k++)
+				{
+					if (dane.osoby_w_windzie[k] == obecne_pietro) //wysiadka
+						dane.osoby_w_windzie.erase(dane.osoby_w_windzie.begin()+k, dane.osoby_w_windzie.begin() + k+1);
+				}
+				for (int i = 0; i < dane.osoby_na_pietrach[obecne_pietro].size(); i++)
+				{//wsiadanko
+					if (dane.osoby_na_pietrach[obecne_pietro][i] > obecne_pietro && dane.osoby_w_windzie.size() < 7)
+						dane.osoby_w_windzie.push_back(dane.osoby_na_pietrach[obecne_pietro][i]);
+				}
+
+			}
+		}
+	}
 }
 
 void Pisz_1(HDC hdc, int przesuniecie)
@@ -748,7 +800,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 			rysuj_osobe(hdc, 5, 4, dane, hWnd, ps, &kolejka5);
 			break;
 		case ID_GO:
-			//zbieranie_danych(dane, 5, 2);
+			Jezdzenie(dane);
 
 			break;
 
