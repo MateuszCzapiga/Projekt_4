@@ -279,13 +279,15 @@ int szukanie_min_pietra(informacje dane)
 	return 1;
 }
 
-int szukanie_max_pietra(informacje dane, int obecne_pietro)
+int szukanie_max_pietra(informacje dane, int obecne_pietro, int akualny_max)
 {
+	if (dane.osoby_na_pietrach[obecne_pietro - 1].size() == 0)
+		return akualny_max;
 	int max = -1;
-	for (int i = 0; i < dane.osoby_na_pietrach[obecne_pietro-1].size(); i++)
+	for (int i = 0; i < dane.osoby_na_pietrach[obecne_pietro - 1].size(); i++)
 	{
 		if (dane.osoby_na_pietrach[obecne_pietro - 1][i] > max && dane.osoby_na_pietrach[obecne_pietro - 1][i] != 0)
-			max = dane.osoby_na_pietrach[obecne_pietro-1][i];
+			max = dane.osoby_na_pietrach[obecne_pietro - 1][i];
 	}
 	return max;
 }
@@ -304,20 +306,48 @@ bool koniec(informacje dane)
 	return zwracana;
 }
 
+void usuwanie_ludzi_z_pieter(informacje& dane)
+{
+	// usuwanie 0 -- osoby na pietrach
+	for (int i = 0; i < dane.osoby_na_pietrach.size(); i++)
+	{
+		int temp_size_pietra = dane.osoby_na_pietrach[i].size() - 1;
+		for (int j = temp_size_pietra; j >= 0; j--)
+		{
+			if (dane.osoby_na_pietrach[i][j] == 0)
+			{
+				dane.osoby_na_pietrach[i].erase(dane.osoby_na_pietrach[i].begin() + j, dane.osoby_na_pietrach[i].begin() + j + 1);
+			}
+		}
+	}
+}
+
+void usuwanie_ludzi_z_windy(informacje& dane)
+{
+	//// usuwanie 0 -- osoby w windzie
+	int temp_size_winda = dane.osoby_w_windzie.size() - 1;
+	for (int i = temp_size_winda; i >= 0; i--)
+	{
+		if (dane.osoby_w_windzie[i] == 0)
+			dane.osoby_w_windzie.erase(dane.osoby_w_windzie.begin() + i, dane.osoby_w_windzie.begin() + i + 1);
+	}
+}
+
 void Jezdzenie(informacje& dane)
 {
-	int obecne_pietro = 0;
+	int obecne_pietro = 0, max_pietro = 1;
 	if (koniec(dane) && dane.osoby_w_windzie.empty())
 		int a;
-	else 
+	else
 		int b;
 	while (!koniec(dane) || !dane.osoby_w_windzie.size() == 0)
 	{
 		int min_pietro = szukanie_min_pietra(dane);
 		obecne_pietro = min_pietro;
+
 		//przejazd();wizualny
-		int max_pietro = szukanie_max_pietra(dane, obecne_pietro);
-		for (int i = 0; i < dane.osoby_na_pietrach[obecne_pietro-1].size(); i++)
+		max_pietro = szukanie_max_pietra(dane, obecne_pietro, max_pietro);
+		for (int i = 0; i < dane.osoby_na_pietrach[obecne_pietro - 1].size(); i++)
 		{
 			if (dane.osoby_na_pietrach[obecne_pietro - 1][i] > obecne_pietro - 1 && dane.osoby_w_windzie.size() < 7)
 			{
@@ -326,13 +356,14 @@ void Jezdzenie(informacje& dane)
 				//dane.osoby_na_pietrach[obecne_pietro - 1].erase(dane.osoby_na_pietrach[obecne_pietro - 1].begin()+i, dane.osoby_na_pietrach[obecne_pietro - 1].begin()+i + 1);
 			}
 		}
+		usuwanie_ludzi_z_pieter(dane);
 		if (!dane.osoby_w_windzie.empty())
 		{
 			for (int j = obecne_pietro; j < max_pietro; j++)
 			{
 				//przejazd na j+1
 				obecne_pietro = j + 1;
-				max_pietro = szukanie_max_pietra(dane, obecne_pietro);
+				max_pietro = szukanie_max_pietra(dane, obecne_pietro, max_pietro);
 				for (int k = 0; k < dane.osoby_w_windzie.size(); k++)
 				{
 					if (dane.osoby_w_windzie[k] == obecne_pietro) //wysiadka
@@ -341,7 +372,8 @@ void Jezdzenie(informacje& dane)
 						//dane.osoby_w_windzie.erase(dane.osoby_w_windzie.begin() + k, dane.osoby_w_windzie.begin() + k + 1);
 					}
 				}
-				for (int i = 0; i < dane.osoby_na_pietrach[obecne_pietro-1].size(); i++)
+				usuwanie_ludzi_z_windy(dane);
+				for (int i = 0; i < dane.osoby_na_pietrach[obecne_pietro - 1].size(); i++)
 				{//wsiadanko
 					if (dane.osoby_na_pietrach[obecne_pietro - 1][i] > obecne_pietro - 1 && dane.osoby_w_windzie.size() < 7)
 					{
@@ -349,18 +381,8 @@ void Jezdzenie(informacje& dane)
 						dane.osoby_na_pietrach[obecne_pietro - 1].erase(dane.osoby_na_pietrach[obecne_pietro - 1].begin() + i, dane.osoby_na_pietrach[obecne_pietro - 1].begin() + i + 1);
 					}
 				}
+				usuwanie_ludzi_z_pieter(dane);
 			}
-
-
-			// usuwanie 0 -- osoby na pietrach
-			for (int i = 0; i < dane.osoby_na_pietrach.size(); i++)
-				for (int j = 0; j < dane.osoby_na_pietrach[i].size(); j++)
-					if (dane.osoby_na_pietrach[i][j] == 0)
-						dane.osoby_na_pietrach[i].erase(dane.osoby_na_pietrach[i].begin() + j, dane.osoby_na_pietrach[i].begin() + j + 1);
-			// usuwanie 0 -- osoby w windzie
-			for (int i = 0; i < dane.osoby_w_windzie.size(); i++)
-				if (dane.osoby_w_windzie[i] == 0)
-					dane.osoby_w_windzie.erase(dane.osoby_w_windzie.begin() + i, dane.osoby_w_windzie.begin() + i + 1);
 		}
 	}
 }
