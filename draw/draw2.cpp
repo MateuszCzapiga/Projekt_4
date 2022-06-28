@@ -279,7 +279,31 @@ int szukanie_min_pietra(informacje dane)
 	return 1;
 }
 
-int szukanie_max_pietra(informacje dane, int obecne_pietro, int akualny_max)
+int szukanie_min_pietra_ludzie(informacje dane, int obecne_pietro, int akualny_min)
+{
+	if (dane.osoby_na_pietrach[obecne_pietro - 1].size() == 0)
+		return akualny_min;
+	int min = 6;
+	for (int i = 0; i < dane.osoby_na_pietrach[obecne_pietro - 1].size(); i++)
+	{
+		if (dane.osoby_na_pietrach[obecne_pietro - 1][i] < min && dane.osoby_na_pietrach[obecne_pietro - 1][i] > 0)
+			min = dane.osoby_na_pietrach[obecne_pietro - 1][i];
+	}
+	return min;
+}
+
+
+int szukanie_max_pietra(informacje dane, int obecne_pietro)
+{
+	for (int i = obecne_pietro-1 ; i >=  0; i--)
+	{
+		if (!dane.osoby_na_pietrach[i].empty())
+			return i + 1;
+	}
+	return obecne_pietro;
+}
+
+int szukanie_max_pietra_ludzie(informacje dane, int obecne_pietro, int akualny_max)
 {
 	if (dane.osoby_na_pietrach[obecne_pietro - 1].size() == 0)
 		return akualny_max;
@@ -335,7 +359,7 @@ void usuwanie_ludzi_z_windy(informacje& dane)
 
 void Jezdzenie(informacje& dane)
 {
-	int obecne_pietro = 0, max_pietro = 1;
+	int obecne_pietro = 0, max_pietro = 1, min_pietro = 5;
 	if (koniec(dane) && dane.osoby_w_windzie.empty())
 		int a;
 	else
@@ -346,7 +370,7 @@ void Jezdzenie(informacje& dane)
 		obecne_pietro = min_pietro;
 
 		//przejazd();wizualny
-		max_pietro = szukanie_max_pietra(dane, obecne_pietro, max_pietro);
+		max_pietro = szukanie_max_pietra_ludzie(dane, obecne_pietro, max_pietro);
 		for (int i = 0; i < dane.osoby_na_pietrach[obecne_pietro - 1].size(); i++)
 		{
 			if (dane.osoby_na_pietrach[obecne_pietro - 1][i] > obecne_pietro - 1 && dane.osoby_w_windzie.size() < 7)
@@ -363,7 +387,7 @@ void Jezdzenie(informacje& dane)
 			{
 				//przejazd na j+1
 				obecne_pietro = j + 1;
-				max_pietro = szukanie_max_pietra(dane, obecne_pietro, max_pietro);
+				max_pietro = szukanie_max_pietra_ludzie(dane, obecne_pietro, max_pietro);
 				for (int k = 0; k < dane.osoby_w_windzie.size(); k++)
 				{
 					if (dane.osoby_w_windzie[k] == obecne_pietro) //wysiadka
@@ -384,6 +408,48 @@ void Jezdzenie(informacje& dane)
 				usuwanie_ludzi_z_pieter(dane);
 			}
 		}
+		// przejazd w dol 
+		
+		int max_pietro_z_ludzmi = szukanie_max_pietra(dane, obecne_pietro);
+		//przejazd wizualnie
+		for (int i = 0; i < dane.osoby_na_pietrach[obecne_pietro - 1].size(); i++)
+		{
+			if (dane.osoby_na_pietrach[obecne_pietro - 1][i] < obecne_pietro - 1 && dane.osoby_w_windzie.size() < 7)
+			{
+				dane.osoby_w_windzie.push_back(dane.osoby_na_pietrach[obecne_pietro - 1][i]);
+				dane.osoby_na_pietrach[obecne_pietro - 1][i] = 0;
+				//dane.osoby_na_pietrach[obecne_pietro - 1].erase(dane.osoby_na_pietrach[obecne_pietro - 1].begin()+i, dane.osoby_na_pietrach[obecne_pietro - 1].begin()+i + 1);
+			}
+		}
+		usuwanie_ludzi_z_pieter(dane);
+		if (!dane.osoby_w_windzie.empty())
+		{
+			for (int j = obecne_pietro; j > min_pietro; j--)
+			{
+				//przejazd na j-1
+				obecne_pietro = j - 1;
+				min_pietro = szukanie_min_pietra_ludzie(dane, obecne_pietro, max_pietro);
+				for (int k = 0; k < dane.osoby_w_windzie.size(); k++)
+				{
+					if (dane.osoby_w_windzie[k] == obecne_pietro) //wysiadka
+					{
+						dane.osoby_w_windzie[k] = 0;
+						//dane.osoby_w_windzie.erase(dane.osoby_w_windzie.begin() + k, dane.osoby_w_windzie.begin() + k + 1);
+					}
+				}
+				usuwanie_ludzi_z_windy(dane);
+				for (int i = 0; i < dane.osoby_na_pietrach[obecne_pietro - 1].size(); i++)
+				{//wsiadanko
+					if (dane.osoby_na_pietrach[obecne_pietro - 1][i] < obecne_pietro - 1 && dane.osoby_w_windzie.size() < 7)
+					{
+						dane.osoby_w_windzie.push_back(dane.osoby_na_pietrach[obecne_pietro - 1][i]);
+						dane.osoby_na_pietrach[obecne_pietro - 1].erase(dane.osoby_na_pietrach[obecne_pietro - 1].begin() + i, dane.osoby_na_pietrach[obecne_pietro - 1].begin() + i + 1);
+					}
+				}
+				usuwanie_ludzi_z_pieter(dane);
+			}
+		}
+
 	}
 }
 
