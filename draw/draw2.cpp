@@ -24,10 +24,12 @@ HWND hwndButton;
 void Jezdzenie();
 
 
+
 std::vector<Point> data;
 RECT drawArea1 = { 0, 0, 150, 200 };
 RECT drawArea2 = { 50, 400, 650, 422 };
 RECT winda = { 710, 70, 890, 720 };
+
 RECT kolejka1 = { 610, 718, 690, 668 };
 RECT kolejka2 = { 910, 590, 990, 540 };
 RECT kolejka3 = { 610, 462, 690, 412 };
@@ -58,7 +60,7 @@ struct informacje
 
 	std::vector<std::vector<int>>osoby_na_pietrach;
 };
-
+void rysowanie_ludzi_w_windzie(informacje dane, HWND hWnd, HDC& hdc, PAINTSTRUCT& ps, int obecne_pietro);
 informacje dane;
 
 
@@ -259,7 +261,7 @@ void rysuj_osobe(HDC& hdc, int poczatek, int cel, informacje dane, HWND hWnd, PA
 
 void Przerysuj_Winde(HWND hWnd, HDC& hdc, PAINTSTRUCT& ps, RECT* drawArea, int obecne_pietro)
 {
-	Sleep(500);
+	//Sleep(500);
 	if (drawArea == NULL)
 		InvalidateRect(hWnd, NULL, TRUE); // repaint all
 	else
@@ -268,8 +270,10 @@ void Przerysuj_Winde(HWND hWnd, HDC& hdc, PAINTSTRUCT& ps, RECT* drawArea, int o
 	hdc = BeginPaint(hWnd, &ps);
 
 	Rysuj_Winde(hdc, obecne_pietro);
+	rysowanie_ludzi_w_windzie(dane, hWnd, hdc, ps, obecne_pietro);
 	EndPaint(hWnd, &ps);
-	//Sleep(500);
+	Sleep(1500);
+
 	
 }
 int szukanie_min_pietra(informacje dane)
@@ -360,16 +364,61 @@ void usuwanie_ludzi_z_windy(informacje& dane)
 	}
 }
 
+void rysowanie_ludzi_w_windzie(informacje dane, HWND hWnd, HDC& hdc, PAINTSTRUCT& ps, int obecne_pietro)
+{
+	RECT ludzie_w_windzie = { 715, 625+ (obecne_pietro - 1) *(-128)  , 885, 715 + (obecne_pietro - 1 )* (-128)};
+	//if (drawArea == NULL)
+	//	InvalidateRect(hWnd, NULL, TRUE); // repaint all
+	//else
+		InvalidateRect(hWnd, &ludzie_w_windzie, TRUE); //repaint drawArea
+	EndPaint(hWnd, &ps);
+	hdc = BeginPaint(hWnd, &ps);
+	int r, g, b;
+	Graphics graphics(hdc);
+	for (int i = 0; i < dane.osoby_w_windzie.size(); i++)
+	{
+
+		switch (dane.osoby_w_windzie[i])
+		{
+		case 1:
+			r = 128, g = 255, b = 255;
+			break;
+		case 2:
+			r = 0, g = 255, b = 64;
+			break;
+		case 3:
+			r = 255, g = 0, b = 128;
+			break;
+		case 4:
+			r = 0, g = 0, b = 255;
+			break;
+		case 5:
+			r = 255, g = 255, b = 0;
+			break;
+		default:
+			break;
+		}
+		Pen pietro(Color(255, r, g, b));
+		//int przesuniecie = dane.osoby_na_pietrach[poczatek - 1][dane.osoby_na_pietrach[poczatek - 1].size() - 1];
+		graphics.DrawLine(&pietro, 720 + i * 10, 715 + (obecne_pietro - 1) * (-128), 720 + i * 10, 670 + (obecne_pietro - 1) * (-128));
+		//Sleep(1000);
+	}
+	EndPaint(hWnd, &ps);
+
+
+}
+
 void poruszanie_windy(informacje dane, HWND hWnd, HDC& hdc, PAINTSTRUCT& ps, RECT* drawArea, int obecne_pietro)
 {
 	/*for (int i = 1; i <= obecne_pietro; i++)
 	{
 		Przerysuj_Winde(hWnd, hdc, ps, drawArea, i);
 	}*/
-
 	Przerysuj_Winde(hWnd, hdc, ps, drawArea, obecne_pietro);
+	Sleep(200);
 	
-	//Sleep(500);
+
+	
 }
 
 void Jezdzenie(informacje& dane, HWND hWnd, HDC& hdc, PAINTSTRUCT& ps, RECT* drawArea)
@@ -435,6 +484,7 @@ void Jezdzenie(informacje& dane, HWND hWnd, HDC& hdc, PAINTSTRUCT& ps, RECT* dra
 						dane.osoby_na_pietrach[obecne_pietro - 1].erase(dane.osoby_na_pietrach[obecne_pietro - 1].begin() + i, dane.osoby_na_pietrach[obecne_pietro - 1].begin() + i + 1);
 					}
 				}
+				rysowanie_ludzi_w_windzie(dane, hWnd, hdc, ps, obecne_pietro);
 				usuwanie_ludzi_z_pieter(dane);
 			}
 		}
