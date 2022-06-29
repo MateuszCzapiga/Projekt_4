@@ -478,10 +478,12 @@ void Jezdzenie(informacje& dane, HWND hWnd, HDC& hdc, PAINTSTRUCT& ps, RECT* dra
 				usuwanie_ludzi_z_windy(dane);
 				for (int i = 0; i < dane.osoby_na_pietrach[obecne_pietro - 1].size(); i++)
 				{//wsiadanko
-					if (dane.osoby_na_pietrach[obecne_pietro - 1][i] > obecne_pietro - 1 && dane.osoby_w_windzie.size() < 7)
+					if (dane.osoby_na_pietrach[obecne_pietro - 1][i] > obecne_pietro /*- 1*/ && dane.osoby_w_windzie.size() < 7)
 					{
 						dane.osoby_w_windzie.push_back(dane.osoby_na_pietrach[obecne_pietro - 1][i]);
-						dane.osoby_na_pietrach[obecne_pietro - 1].erase(dane.osoby_na_pietrach[obecne_pietro - 1].begin() + i, dane.osoby_na_pietrach[obecne_pietro - 1].begin() + i + 1);
+						dane.osoby_na_pietrach[obecne_pietro - 1][i] = 0;
+
+						//dane.osoby_na_pietrach[obecne_pietro - 1].erase(dane.osoby_na_pietrach[obecne_pietro - 1].begin() + i, dane.osoby_na_pietrach[obecne_pietro - 1].begin() + i + 1);
 					}
 				}
 				rysowanie_ludzi_w_windzie(dane, hWnd, hdc, ps, obecne_pietro);
@@ -491,6 +493,16 @@ void Jezdzenie(informacje& dane, HWND hWnd, HDC& hdc, PAINTSTRUCT& ps, RECT* dra
 		// przejazd w dol 
 		
 		int max_pietro_z_ludzmi = szukanie_max_pietra(dane, obecne_pietro);
+
+		if (max_pietro_z_ludzmi < obecne_pietro)
+		{
+			for (int i = 0; i <= abs(max_pietro_z_ludzmi - obecne_pietro); i++)
+			{
+				poruszanie_windy(dane, hWnd, hdc, ps, drawArea, obecne_pietro-i);
+			}
+		}
+
+		obecne_pietro = max_pietro_z_ludzmi;
 		//przejazd wizualnie
 		for (int i = 0; i < dane.osoby_na_pietrach[obecne_pietro - 1].size(); i++)
 		{
